@@ -12,19 +12,19 @@ from pathlib import Path
 # =============================================================================
 
 # Formalizer Model (converts natural language to Lean 4)
-FORMALIZER_MODEL_NAME = "your_local_model_name"  # e.g., "goedel_v3"
-FORMALIZER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13425/v1"
+FORMALIZER_MODEL_NAME = "your_local_model_name"  # e.g., "zhuge"
+FORMALIZER_BASE_URL = "your_local_url"  # e.g., "http://localhost:8000/v1"
 
 # Semantic Checker Model (validates semantic correspondence)
-SEMANTIC_CHECKER_MODEL_NAME = "your_local_model_name"  # e.g., "Qwen3_critic"
-SEMANTIC_CHECKER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13424/v1"
+SEMANTIC_CHECKER_MODEL_NAME = "your_local_model_name"  
+SEMANTIC_CHECKER_BASE_URL = "your_local_url"  
 
 # Prover Model (generates Lean 4 proofs)
-PROVER_MODEL_NAME = "your_local_model_name"  # e.g., "kimina_72b"
-PROVER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13421/v1"
+PROVER_MODEL_NAME = "your_local_model_name"  
+PROVER_BASE_URL = "your_local_url"  
 
 # Lean Server
-LEAN_SERVER_URL = "your_local_lean_server_url"  # e.g., "http://localhost:14457"
+LEAN_SERVER_URL = "your_local_lean_server_url"  # e.g., "http://localhost:8000"
 
 # =============================================================================
 # PROMPT PATHS
