@@ -1,19 +1,11 @@
 import json
-import os
 from datetime import datetime
-from dotenv import load_dotenv
 from pathlib import Path
 from model_calling import ModelCalling
 from lean_verifier import LeanVerifier
 from safe_writer import ThreadSafeJSONLWriter
 from question_formalizer_v1 import QuestionFormalizer
 import config
-
-
-
-env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path)
-url = os.getenv('YOUR_LOCAL_URL')
 
 
 def read_md_as_text(file_path):

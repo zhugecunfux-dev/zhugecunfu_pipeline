@@ -1,15 +1,11 @@
 import json
-import os
-import sys
 from datetime import datetime
-from dotenv import load_dotenv
 from pathlib import Path
 from model_calling import ModelCalling
 from lean_verifier import LeanVerifier
 from safe_writer import ThreadSafeJSONLWriter
-from question_formalizer_v0 import QuestionFormalizer
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from utils.text_extractor import extract_lean_code,_parse_json_response
+from utils.text_extractor import extract_lean_code, _parse_json_response
 import config
 
 
