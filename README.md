@@ -2,6 +2,18 @@
 
 A pipeline for auto-formalizing natural language mathematical problems into Lean 4 code and automatically proving them.
 
+## Quick Start
+
+1. **Install dependencies:** `pip install -r requirements.txt`
+2. **Configure settings:** Edit `zhugecunfu/config.py` and update:
+   - Model names and URLs (your local LLM servers)
+   - Lean server URL
+   - Input/output file paths
+3. **Run formalization:** `cd zhugecunfu && python main_v1.py`
+4. **Run proving:** `cd zhugecunfu && python prover_test.py`
+
+See detailed instructions below for complete setup and configuration.
+
 ## Overview
 
 This pipeline consists of two main stages:
@@ -34,83 +46,79 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Before running the pipeline, you need to configure the following settings:
+All configuration is centralized in **`zhugecunfu/config.py`**. Before running the pipeline, edit this single file to set up your environment.
 
-### 1. Update Model URLs and Names
+### Configuration File: `zhugecunfu/config.py`
 
-In **`zhugecunfu/main_v1.py`**, update the following configurations:
+Open `zhugecunfu/config.py` and update the following sections:
+
+#### 1. Model Configuration
+
+Update the model names and URLs for your local LLM servers:
 
 ```python
-# Line 34: Formalizer model configuration
-formalizer = ModelCalling(
-    "your_local_model_name",  # Change this to your model name
-    url="your_local_url",     # Change this to your local LLM server URL
-    system_prompt=system_prompt
-)
+# Formalizer Model (converts natural language to Lean 4)
+FORMALIZER_MODEL_NAME = "your_local_model_name"  # e.g., "goedel_v3"
+FORMALIZER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13425/v1"
 
-# Line 36: Lean server URL
-LEAN_SERVER_URL = "your_local_lean_server_url"  # Change this to your Lean server URL
+# Semantic Checker Model (validates semantic correspondence)
+SEMANTIC_CHECKER_MODEL_NAME = "your_local_model_name"  # e.g., "Qwen3_critic"
+SEMANTIC_CHECKER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13424/v1"
 
-# Line 45: Semantic checker model configuration
-semantic_checker = ModelCalling(
-    "your_local_model_name",  # Change this to your model name
-    url="your_local_url",     # Change this to your local LLM server URL
-    system_prompt=system_prompt,
-    params=params
-)
+# Prover Model (generates Lean 4 proofs)
+PROVER_MODEL_NAME = "your_local_model_name"  # e.g., "kimina_72b"
+PROVER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13421/v1"
+
+# Lean Server
+LEAN_SERVER_URL = "your_local_lean_server_url"  # e.g., "http://localhost:14457"
 ```
 
-In **`zhugecunfu/prover_test.py`**, update:
+#### 2. Prompt Paths (Usually No Change Needed)
+
+The prompt paths are configured relative to the project directory. You typically don't need to change these unless you move the prompt files:
 
 ```python
-# Line 30: Lean server URL
-LEAN_SERVER_URL = "your_local_lean_server_url"  # Change this to your Lean server URL
-
-# Line 35: Prover model configuration
-prover = ModelCalling(
-    "your_local_model_name",  # Change this to your model name
-    url="your_local_url",     # Change this to your local LLM server URL
-    system_prompt=system_prompt
-)
+# System prompts for models
+FORMALIZER_PROMPT_PATH = BASE_DIR / "prompts" / "system_prompt_formalizer.md"
+SEMANTIC_CHECKER_PROMPT_PATH = BASE_DIR / "prompts" / "system_prompt_semantic.md"
 ```
 
-### 2. Update Prompt Paths
+#### 3. Input and Output File Paths
 
-In **`zhugecunfu/main_v1.py`**, update the prompt file paths:
+Update the data directory and file paths:
 
 ```python
-# Line 31: Formalizer system prompt path
-file_path = r"your/path/to/prompts/system_prompt_formalizer.md"
+# Input/Output directories
+DATA_DIR = Path("your/path/to/data")  # Update this to your data directory
 
-# Line 40: Semantic checker system prompt path
-file_path = r"your/path/to/prompts/system_prompt_semantic.md"
+# Formalization (main_v1.py) paths
+FORMALIZATION_INPUT_FILE = DATA_DIR / "input" / "problems.jsonl"
+FORMALIZATION_OUTPUT_DIR = DATA_DIR / "output"
+
+# Proving (prover_test.py) paths
+PROVING_INPUT_FILE = DATA_DIR / "output" / "lean_output.jsonl"
+PROVING_OUTPUT_DIR = DATA_DIR / "results"
 ```
 
-Example:
+**Example configuration:**
 ```python
-file_path = r"/home/user/zhugecunfu_pipeline/zhugecunfu/prompts/system_prompt_formalizer.md"
+DATA_DIR = Path("/home/user/my_data")
+FORMALIZATION_INPUT_FILE = DATA_DIR / "input" / "my_problems.jsonl"
 ```
 
-### 3. Update Input and Output File Paths
+#### 4. Pipeline Parameters (Optional)
 
-#### For Formalization (main_v1.py):
-
-```python
-# Line 53-55: Output file path for formalization results
-output_file = r"your/path/to/output/lean_output.jsonl"
-
-# Line 62: Input file path with natural language problems
-file_path = r"your/path/to/input/problems.jsonl"
-```
-
-#### For Proving (prover_test.py):
+You can adjust these parameters to control the pipeline behavior:
 
 ```python
-# Line 17: Input file path (should be the output from main_v1.py)
-input_file = r"your/path/to/output/lean_output.jsonl"
+# Formalization parameters
+MAX_LEAN_GENERATION = 5  # Maximum attempts to generate valid Lean code
+MAX_FULL_CHECK = 7  # Maximum full check iterations (syntax + semantic)
 
-# Line 38-40: Output file path for proving results
-output_file = r"your/path/to/results/proof_results.jsonl"
+# Proving parameters
+MAX_PROVING_ATTEMPTS = 2  # Maximum proving attempts per problem
+PROVING_MAX_WORKERS = 8  # Number of parallel proving workers
+PROVING_REPETITIONS = 8  # Number of times to repeat each problem for proving
 ```
 
 ## Input File Format
@@ -192,20 +200,9 @@ This will:
 }
 ```
 
-## Configuration Parameters
+## Advanced Configuration
 
-### Formalization Parameters (main_v1.py)
-
-```python
-params['max_lean_generation'] = 5  # Maximum attempts to generate valid Lean code
-params['max_full_check'] = 7       # Maximum full check iterations (syntax + semantic)
-```
-
-### Proving Parameters (prover_test.py)
-
-```python
-max_workers = 8  # Number of parallel proving workers
-```
+All pipeline parameters can be adjusted in `zhugecunfu/config.py`. See the "Pipeline Parameters" section in the config file for details.
 
 ## Troubleshooting
 
@@ -225,6 +222,7 @@ Check console output for detailed progress and error messages during execution.
 ```
 zhugecunfu_pipeline/
 ├── zhugecunfu/
+│   ├── config.py                     # ⚙️ CONFIGURATION FILE (edit this!)
 │   ├── main_v1.py                    # Formalization pipeline
 │   ├── prover_test.py                # Proving pipeline
 │   ├── model_calling.py              # LLM API wrapper
@@ -241,6 +239,8 @@ zhugecunfu_pipeline/
 ├── README.md
 └── requirements.txt
 ```
+
+**Key File:** All configuration is centralized in `zhugecunfu/config.py` - this is the only file you need to edit to set up the pipeline.
 
 ## License
 
