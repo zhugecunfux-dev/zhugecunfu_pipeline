@@ -164,6 +164,10 @@ This will:
 
 ### Step 2: Proving
 
+## Prover
+```bash
+git clone https://huggingface.co/AI-MO/Kimina-Prover-72B
+```
 After formalization completes, run the proving stage using the formalization output:
 
 ```bash
@@ -242,10 +246,4 @@ zhugecunfu_pipeline/
 
 **Key File:** All configuration is centralized in `zhugecunfu/config.py` - this is the only file you need to edit to set up the pipeline.
 
-## License
 
-[Add your license information here]
-
-## Contributing
-
-[Add contributing guidelines here]
