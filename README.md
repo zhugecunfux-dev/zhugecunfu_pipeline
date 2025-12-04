@@ -58,19 +58,19 @@ Update the model names and URLs for your local LLM servers:
 
 ```python
 # Formalizer Model (converts natural language to Lean 4)
-FORMALIZER_MODEL_NAME = "your_local_model_name"  # e.g., "goedel_v3"
-FORMALIZER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13425/v1"
+FORMALIZER_MODEL_NAME = "your_local_model_name"  # e.g., "goedel"
+FORMALIZER_BASE_URL = "your_local_url"  # e.g., "http://localhost:8000/v1"
 
 # Semantic Checker Model (validates semantic correspondence)
-SEMANTIC_CHECKER_MODEL_NAME = "your_local_model_name"  # e.g., "Qwen3_critic"
-SEMANTIC_CHECKER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13424/v1"
+SEMANTIC_CHECKER_MODEL_NAME = "your_local_model_name"  # e.g., "Qwen3"
+SEMANTIC_CHECKER_BASE_URL = "your_local_url"  # e.g., "http://localhost:9000/v1"
 
 # Prover Model (generates Lean 4 proofs)
 PROVER_MODEL_NAME = "your_local_model_name"  # e.g., "kimina_72b"
-PROVER_BASE_URL = "your_local_url"  # e.g., "http://localhost:13421/v1"
+PROVER_BASE_URL = "your_local_url"  # e.g., "http://localhost:10000/v1"
 
 # Lean Server
-LEAN_SERVER_URL = "your_local_lean_server_url"  # e.g., "http://localhost:14457"
+LEAN_SERVER_URL = "your_local_lean_server_url"  # e.g., "http://localhost:15000"
 ```
 
 #### 2. Prompt Paths (Usually No Change Needed)
@@ -147,7 +147,14 @@ The prover expects the output from `main_v1.py`, which has the following format:
 ## Running the Pipeline
 
 ### Step 1: Formalization
-
+#### Formalizer
+```bash
+git clone https://huggingface.co/Zhugecunfu/Zhugecunfu_Formalizer
+```
+#### Verifier
+```bash
+git clone https://huggingface.co/Zhugecunfu/Zhugecunfu_Critic
+```
 Run the formalization stage to convert natural language problems into Lean 4:
 
 ```bash
@@ -164,7 +171,7 @@ This will:
 
 ### Step 2: Proving
 
-## Prover
+#### Prover
 ```bash
 git clone https://huggingface.co/AI-MO/Kimina-Prover-72B
 ```
