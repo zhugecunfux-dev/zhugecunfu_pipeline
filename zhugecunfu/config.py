@@ -41,21 +41,16 @@ SEMANTIC_CHECKER_PROMPT_PATH = BASE_DIR / "prompts" / "system_prompt_semantic.md
 # FILE PATHS
 # =============================================================================
 
-# Input/Output directories
-# You can specify paths as strings or Path objects - they will be converted automatically
-# Examples:
-#   DATA_DIR = Path("/home/user/my_data")
-#   DATA_DIR = "/home/user/my_data"
-DATA_DIR = "your/path/to/data"  # Update this to your data directory
+# Input/Output directories (you can use absolute paths or relative to BASE_DIR)
+DATA_DIR = Path("your/path/to/data")  # Update this to your data directory
 
 # Formalization (main_v1.py) paths
-# Note: Use plain strings for paths - they will be converted to Path objects automatically
-FORMALIZATION_INPUT_FILE = "your/path/to/input/problems.jsonl"
-FORMALIZATION_OUTPUT_DIR = "your/path/to/output"
+FORMALIZATION_INPUT_FILE = DATA_DIR / "input" / "problems.jsonl"
+FORMALIZATION_OUTPUT_DIR = DATA_DIR / "output"
 
 # Proving (prover_test.py) paths
-PROVING_INPUT_FILE = "your/path/to/output/lean_output.jsonl"  # Usually the output from formalization
-PROVING_OUTPUT_DIR = "your/path/to/results"
+PROVING_INPUT_FILE = DATA_DIR / "output" / "lean_output.jsonl"  # Usually the output from formalization
+PROVING_OUTPUT_DIR = DATA_DIR / "results"
 
 # =============================================================================
 # MODEL PARAMETERS

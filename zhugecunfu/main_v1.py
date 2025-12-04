@@ -43,13 +43,12 @@ params['max_lean_generation'] = config.MAX_LEAN_GENERATION
 params['max_full_check'] = config.MAX_FULL_CHECK
 
 # Setup output file
-output_dir = Path(config.FORMALIZATION_OUTPUT_DIR)
-output_dir.mkdir(parents=True, exist_ok=True)
-output_file = output_dir / f"formalization_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+config.FORMALIZATION_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+output_file = config.FORMALIZATION_OUTPUT_DIR / f"formalization_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
 jsonwriter = ThreadSafeJSONLWriter(str(output_file))
 
 # Load input file
-file_path = Path(config.FORMALIZATION_INPUT_FILE)
+file_path = config.FORMALIZATION_INPUT_FILE
 informals = []
 
 thm_to_id = dict()
