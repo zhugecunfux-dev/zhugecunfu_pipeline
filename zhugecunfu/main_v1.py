@@ -13,7 +13,7 @@ import config
 
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
-url = os.getenv('GOEDEL_BASE_URL')
+url = os.getenv('YOUR_LOCAL_URL')
 
 
 def read_md_as_text(file_path):
