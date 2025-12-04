@@ -1,0 +1,12 @@
+# Core dependencies
+openai>=1.0.0
+
+# Lean verification (custom package - install separately)
+# kimina_client
+
+# Standard library dependencies (included with Python)
+# json
+# pathlib
+# datetime
+# concurrent.futures
+# threading

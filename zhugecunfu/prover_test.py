@@ -1,44 +1,44 @@
 import json
-import os
-import sys
-
-
 from datetime import datetime
-from dotenv import load_dotenv
 from pathlib import Path
 from model_calling import ModelCalling
 from lean_verifier import LeanVerifier
 from safe_writer import ThreadSafeJSONLWriter
-from question_formalizer_v0 import QuestionFormalizer
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from utils.text_extractor import extract_lean_code,_parse_json_response
+from utils.text_extractor import extract_lean_code, _parse_json_response
+import config
 
 
-input_file = r"/mnt/disk0/t00917290/imo_autoformalization/main/mayi/competition_data/output/1127/lean_1127_20251127_091212.jsonl"
+# Load input file (from formalization output)
+input_file = config.PROVING_INPUT_FILE
 data = []
 
-with open(input_file, 'r', encoding = 'utf-8') as f:
+with open(str(input_file), 'r', encoding='utf-8') as f:
     for line in f:
         data.append(json.loads(line))
 
+# Replicate input for multiple proving attempts
 my_input = []
-for _ in range(8):
+for _ in range(config.PROVING_REPETITIONS):
     for d in data:
         my_input.append(d)
 
+# Initialize Lean verifier
+leanverifier = LeanVerifier(config.LEAN_SERVER_URL)
 
-LEAN_SERVER_URL="http://localhost:14457"
-leanverifier = LeanVerifier(LEAN_SERVER_URL)
-
+# Initialize prover model
 system_prompt = '''You are an expert in mathematics and Lean 4.'''
+prover = ModelCalling(
+    config.PROVER_MODEL_NAME,
+    url=config.PROVER_BASE_URL,
+    system_prompt=system_prompt,
+    params=config.PROVER_PARAMS
+)
 
-prover = ModelCalling("kimina_72b", url = "http://localhost:13421/v1", system_prompt = system_prompt)
-
-
-output_file = r"/mnt/disk0/t00917290/imo_autoformalization/main/mayi/competition_data/result/1127/proof_1127_"
-output_file += datetime.now().strftime("%Y%m%d_%H%M%S")
-output_file += ".jsonl"
-jsonwriter = ThreadSafeJSONLWriter(output_file)
+# Setup output file
+config.PROVING_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+output_file = config.PROVING_OUTPUT_DIR / f"proof_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+jsonwriter = ThreadSafeJSONLWriter(str(output_file))
 
 
 def prove(id,informal, formal):
@@ -66,7 +66,7 @@ If there is a `solution` variable, ensure that
 
         extra_user_prompt = ""
 
-        for _ in range(2):
+        for _ in range(config.MAX_PROVING_ATTEMPTS):
 
             print('user prompt: ')
             print(user_prompt + extra_user_prompt)
@@ -119,7 +119,7 @@ If there is a `solution` variable, ensure that
 
 
 
-with ThreadPoolExecutor(max_workers=8) as executor:
+with ThreadPoolExecutor(max_workers=config.PROVING_MAX_WORKERS) as executor:
     futures = [executor.submit(prove, d['id'], d['nl_problem'], d['formal']) for d in my_input]
 
     cnt = 0

@@ -1,21 +1,11 @@
 import json
-import os
-
-
-
 from datetime import datetime
-from dotenv import load_dotenv
 from pathlib import Path
 from model_calling import ModelCalling
 from lean_verifier import LeanVerifier
 from safe_writer import ThreadSafeJSONLWriter
 from question_formalizer_v1 import QuestionFormalizer
-
-
-
-env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path)
-url = os.getenv('GOEDEL_BASE_URL')
+import config
 
 
 def read_md_as_text(file_path):
@@ -25,41 +15,40 @@ def read_md_as_text(file_path):
     return content
 
 
+# Load system prompts from config
+formalizer_system_prompt = read_md_as_text(config.FORMALIZER_PROMPT_PATH)
+semantic_system_prompt = read_md_as_text(config.SEMANTIC_CHECKER_PROMPT_PATH)
+
+# Initialize models
+formalizer = ModelCalling(
+    config.FORMALIZER_MODEL_NAME,
+    url=config.FORMALIZER_BASE_URL,
+    system_prompt=formalizer_system_prompt,
+    params=config.FORMALIZER_PARAMS
+)
+
+leanverifier = LeanVerifier(config.LEAN_SERVER_URL)
+
+semantic_checker = ModelCalling(
+    config.SEMANTIC_CHECKER_MODEL_NAME,
+    url=config.SEMANTIC_CHECKER_BASE_URL,
+    system_prompt=semantic_system_prompt,
+    params=config.SEMANTIC_CHECKER_PARAMS
+)
+
+
+# Pipeline parameters
 params = dict()
+params['max_lean_generation'] = config.MAX_LEAN_GENERATION
+params['max_full_check'] = config.MAX_FULL_CHECK
 
+# Setup output file
+config.FORMALIZATION_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+output_file = config.FORMALIZATION_OUTPUT_DIR / f"formalization_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+jsonwriter = ThreadSafeJSONLWriter(str(output_file))
 
-file_path = r"/mnt/disk0/t00917290/imo_autoformalization/main/ZHUGECUNFU/zhugecunfu_pipeline/Zhugecunfu_pipeline/prompts/system_prompt_formalizer.md"
-system_prompt = read_md_as_text(file_path)
-
-formalizer = ModelCalling("goedel_v3",url="http://localhost:13425/v1",system_prompt = system_prompt)
-
-LEAN_SERVER_URL="http://localhost:14457"
-leanverifier = LeanVerifier(LEAN_SERVER_URL)
-
-
-file_path = r"/mnt/disk0/t00917290/imo_autoformalization/main/ZHUGECUNFU/zhugecunfu_pipeline/Zhugecunfu_pipeline/prompts/system_prompt_semantic.md"
-system_prompt = read_md_as_text(file_path)
-params['temperature'] = 0.5
-params['use_json'] = True
-
-semantic_checker = ModelCalling("Qwen3_critic",url="http://localhost:13424/v1",system_prompt = system_prompt, params = params)
-
-
-params = dict()
-params['max_lean_generation'] = 5
-params['max_full_check'] = 7
-
-
-output_file = r"/mnt/disk0/t00917290/imo_autoformalization/main/mayi/competition_data/output/1127/lean_1127_"
-output_file += datetime.now().strftime("%Y%m%d_%H%M%S")
-output_file += ".jsonl"
-jsonwriter = ThreadSafeJSONLWriter(output_file)
-
-
-
-
-
-file_path = r"/mnt/disk0/t00917290/imo_autoformalization/main/mayi/competition_data/source/lean_1127.jsonl"
+# Load input file
+file_path = config.FORMALIZATION_INPUT_FILE
 informals = []
 
 thm_to_id = dict()
@@ -81,13 +70,13 @@ questionformalizer.formalize_all()
 
 
 data = []
-with open(output_file,'r',encoding='utf-8') as f:
+with open(str(output_file),'r',encoding='utf-8') as f:
     for line in f:
         data.append(json.loads(line))
 
 data = [{'id':thm_to_id[thm['informal']], 'nl_problem':thm['informal'], 'formal':thm['formal']} for thm in data]
 
-with open(output_file,'w',encoding='utf-8') as f:
+with open(str(output_file),'w',encoding='utf-8') as f:
     for d in data:
         f.write(json.dumps(d,ensure_ascii=False) + '\n')
 
