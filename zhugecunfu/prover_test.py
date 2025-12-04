@@ -10,7 +10,7 @@ import config
 
 
 # Load input file (from formalization output)
-input_file = config.PROVING_INPUT_FILE
+input_file = Path(config.PROVING_INPUT_FILE)
 data = []
 
 with open(str(input_file), 'r', encoding='utf-8') as f:
@@ -36,8 +36,9 @@ prover = ModelCalling(
 )
 
 # Setup output file
-config.PROVING_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-output_file = config.PROVING_OUTPUT_DIR / f"proof_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+output_dir = Path(config.PROVING_OUTPUT_DIR)
+output_dir.mkdir(parents=True, exist_ok=True)
+output_file = output_dir / f"proof_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
 jsonwriter = ThreadSafeJSONLWriter(str(output_file))
 
 
